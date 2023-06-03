@@ -1,7 +1,7 @@
 
 
 // src/controllers/userController.js
-const { createUser, getUserByEmail } = require('../models/user');
+const { createUser, getUserByEmail,getUserByID, getAllUsers, updateUserByID, deleteUserByID} = require('../models/user');
 const { hashPassword, comparePassword } = require('../utils/bcrypt');
 const { generateToken } = require('../utils/jwt');
 
@@ -47,7 +47,84 @@ async function login(req, res) {
   }
 }
 
+async function AllUsers(req, res) {
+
+  try {
+    const users = await getAllUsers();
+    if (!users) {
+      return res.status(404).json({ message: 'Nenhum usário encontrado' });
+    }
+    
+    return res.status(200).json(users);
+
+  } catch (error) {
+    console.error('Erro ao buscar usuários:', error);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }  
+}
+
+async function getUser(req, res) {
+  const { id } = req.params;
+
+  try {
+    const user = await getUserByID(id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
+    return res.status(200).json(user);
+
+  } catch (error) {
+    console.error('Erro ao buscar usuário:', error);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }  
+}
+
+async function editUser(req, res) {
+  const { id } = req.params;
+  const { userName, email, password } = req.body;
+
+  try {
+    const existingUser = await getUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email cadastrado  já existente' });
+    }
+
+    const hashedPassword = await hashPassword(password);
+    const userId = await updateUserByID(id, userName, email, hashedPassword);
+
+    res.status(201).json({ message: 'Usuário atualizado com sucesso', userId });
+  } catch (error) {
+    console.error('Erro ao criar usuário:', error);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }  
+}
+
+async function deleteUser(req, res) {
+  const { id } = req.params;
+
+  try {
+    const existingUser = await getUserByID(id);
+    if (!existingUser) {
+
+      return res.status(404).json({ message: 'Usuário não existe' });
+    }
+
+    await deleteUserByID(id);
+    return res.status(200).json({ message: 'Usuário deletado' });
+
+
+  } catch (error) {
+    console.error('Erro ao buscar usuário:', error);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }  
+}
+
 module.exports = {
   signup,
   login,
+  AllUsers,
+  getUser,
+  editUser,
+  deleteUser,
 };

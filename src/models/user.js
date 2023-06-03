@@ -8,6 +8,13 @@ async function createUser(userName, email, password) {
   return result.insertId;
 }
 
+async function getAllUsers() {
+  const connection = await connect;
+  const query = `SELECT * FROM users`;
+  const [rows] = await connection.execute(query);
+  return rows;
+}
+
 async function getUserByEmail(email) {
   const connection = await connect;
   const query = `SELECT * FROM users WHERE email = ?`;
@@ -15,7 +22,32 @@ async function getUserByEmail(email) {
   return rows[0];
 }
 
+async function getUserByID(id) {
+  const connection = await connect;
+  const query = `SELECT * FROM users WHERE id = ?`;
+  const [rows] = await connection.execute(query, [id]);
+  return rows[0];
+}
+
+async function updateUserByID(id, userName, email, password) {
+  const connection = await connect;
+  const query = `UPDATE users SET userName = ?, email = ?, password =  ? WHERE id = ?`;
+  const [updateUser] = await connection.execute(query, [userName, email, password, id]);
+  return updateUser;
+}
+
+async function deleteUserByID(id) {
+  const connection = await connect;
+  const query = `DELETE FROM users WHERE id = ?`;
+  const [rows] = await connection.execute(query, [id]);
+  return rows[0];
+}
+
 module.exports = {
   createUser,
+  getAllUsers,
   getUserByEmail,
+  getUserByID,
+  updateUserByID,
+  deleteUserByID,
 };
