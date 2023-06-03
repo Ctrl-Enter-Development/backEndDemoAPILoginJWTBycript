@@ -1,7 +1,7 @@
 
 
 // src/controllers/userController.js
-const { createUser, getUserByEmail,getUserByID, getAllUsers, updateUserByID, deleteUserByID} = require('../models/user');
+const { createUser, getUserByEmail,getUserByID, getAllUsers, updateUserById, deleteUserByID} = require('../models/user');
 const { hashPassword, comparePassword } = require('../utils/bcrypt');
 const { generateToken } = require('../utils/jwt');
 
@@ -80,25 +80,44 @@ async function getUser(req, res) {
   }  
 }
 
-async function editUser(req, res) {
+async function updateUser(req, res) {
   const { id } = req.params;
   const { userName, email, password } = req.body;
 
   try {
-    const existingUser = await getUserByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email cadastrado  já existente' });
+    const user = await getUserByID(id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
+    if (email !== user.email) {
+      const existingUserByEmail = await getUserByEmail(email);
+      if (existingUserByEmail) {
+        return res.status(400).json({ message: 'O email já está em uso' });
+      }
     }
 
     const hashedPassword = await hashPassword(password);
-    const userId = await updateUserByID(id, userName, email, hashedPassword);
 
-    res.status(201).json({ message: 'Usuário atualizado com sucesso', userId });
+    // Verifique se o email não está sendo usado por outro usuário além do usuário atual
+    const otherUsersWithSameEmail = await getUserByEmail(email);
+    if (otherUsersWithSameEmail && otherUsersWithSameEmail.id !== id) {
+      return res.status(400).json({ message: 'O email já está em uso' });
+    }
+
+    const updated = await updateUserById(id, userName, email, hashedPassword);
+    if (!updated) {
+      return res.status(500).json({ message: 'Erro ao atualizar o usuário' });
+    }
+
+    res.json({ message: 'Usuário atualizado com sucesso' });
   } catch (error) {
-    console.error('Erro ao criar usuário:', error);
+    console.error('Erro ao atualizar usuário:', error);
     res.status(500).json({ message: 'Erro interno do servidor' });
-  }  
+  }
 }
+
+
 
 async function deleteUser(req, res) {
   const { id } = req.params;
@@ -125,6 +144,6 @@ module.exports = {
   login,
   AllUsers,
   getUser,
-  editUser,
+  updateUser,
   deleteUser,
 };

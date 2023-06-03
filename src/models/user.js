@@ -29,11 +29,12 @@ async function getUserByID(id) {
   return rows[0];
 }
 
-async function updateUserByID(id, userName, email, password) {
+async function updateUserById(id, userName, email, password) {
   const connection = await connect;
-  const query = `UPDATE users SET userName = ?, email = ?, password =  ? WHERE id = ?`;
-  const [updateUser] = await connection.execute(query, [userName, email, password, id]);
-  return updateUser;
+
+  const query = `UPDATE users SET userName = ?, email = ?, password = ? WHERE id = ?`;
+  const [result] = await connection.execute(query, [userName, email, password, id]);
+  return result.affectedRows === 1;
 }
 
 async function deleteUserByID(id) {
@@ -48,6 +49,6 @@ module.exports = {
   getAllUsers,
   getUserByEmail,
   getUserByID,
-  updateUserByID,
+  updateUserById,
   deleteUserByID,
 };
