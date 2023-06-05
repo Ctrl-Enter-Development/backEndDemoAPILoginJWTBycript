@@ -16,7 +16,19 @@ function authMiddleware(req, res, next) {
 }
 
 req.userId = decoded.id;
+req.userProfile = decoded.profile;
+
 next();
 }
-module.exports = authMiddleware;
+
+function adminOnly(req, res, next) {
+  if (req.userProfile !== 'admin') {
+    return res.status(403).json({ message: 'Acesso não autorizado' });
+  }
+
+  next();
+}
+module.exports = {
+  authMiddleware, 
+  adminOnly};
 

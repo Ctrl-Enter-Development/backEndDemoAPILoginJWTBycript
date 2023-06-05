@@ -1,8 +1,7 @@
 // src/routes/userRoutes.js
 const express = require('express');
 const { signup, login, getUser, AllUsers, updateUser, deleteUser} = require('../controllers/userController');
-const authMiddleware = require('../middlewares/authMiddlewares');
-
+const { authMiddleware, adminOnly } = require('../middlewares/authMiddlewares');
 const router = express.Router();
 
 router.post('/signup', signup);
@@ -14,6 +13,10 @@ router.delete('/user/:id', deleteUser);
 
 router.get('/protected', authMiddleware, (req, res) => {
   res.json({ message: 'Rota protegida' });
+});
+
+router.get('/admin', authMiddleware, adminOnly, (req, res) => {
+  res.json({ message: 'Rota apenas para administradores' });
 });
 
 module.exports = router;

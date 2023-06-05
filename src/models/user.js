@@ -1,10 +1,10 @@
 // src/models/user.js
 const connect = require('../config/connection');
 
-async function createUser(userName, email, password) {
+async function createUser(userName, email, password, profile) {
   const connection = await connect;
-  const query = `INSERT INTO users (userName, email, password) VALUES (?, ?, ?)`;
-  const [result] = await connection.execute(query, [userName, email, password]);
+  const query = `INSERT INTO users (userName, email, password, profile) VALUES (?, ?, ?, ?)`;
+  const [result] = await connection.execute(query, [userName, email, password, profile]);
   return result.insertId;
 }
 
@@ -29,11 +29,11 @@ async function getUserByID(id) {
   return rows[0];
 }
 
-async function updateUserById(id, userName, email, password) {
+async function updateUserById(id, userName, email, password, profile) {
   const connection = await connect;
 
-  const query = `UPDATE users SET userName = ?, email = ?, password = ? WHERE id = ?`;
-  const [result] = await connection.execute(query, [userName, email, password, id]);
+  const query = `UPDATE users SET userName = ?, email = ?, password = ?, profile = ? WHERE id = ?`;
+  const [result] = await connection.execute(query, [userName, email, password, profile,id]);
   return result.affectedRows === 1;
 }
 

@@ -6,7 +6,7 @@ const { hashPassword, comparePassword } = require('../utils/bcrypt');
 const { generateToken } = require('../utils/jwt');
 
 async function signup(req, res) {
-  const { userName, email, password } = req.body;
+  const { userName, email, password, profile } = req.body;
 
   try {
     const existingUser = await getUserByEmail(email);
@@ -15,7 +15,7 @@ async function signup(req, res) {
     }
 
     const hashedPassword = await hashPassword(password);
-    const userId = await createUser(userName, email, hashedPassword);
+    const userId = await createUser(userName, email, hashedPassword, profile);
 
     res.status(201).json({ message: 'Usuário criado com sucesso', userId });
   } catch (error) {
@@ -38,7 +38,7 @@ async function login(req, res) {
       return res.status(401).json({ message: 'Credenciais inválidas' });
     }
 
-    const token = generateToken({ id: user.id });
+    const token = generateToken({ id: user.id, profile: user.profile  });
 
     res.json({ token });
   } catch (error) {
@@ -82,7 +82,7 @@ async function getUser(req, res) {
 
 async function updateUser(req, res) {
   const { id } = req.params;
-  const { userName, email, password } = req.body;
+  const { userName, email, password, profile } = req.body;
 
   try {
     const user = await getUserByID(id);
@@ -105,7 +105,7 @@ async function updateUser(req, res) {
       return res.status(400).json({ message: 'O email já está em uso' });
     }
 
-    const updated = await updateUserById(id, userName, email, hashedPassword);
+    const updated = await updateUserById(id, userName, email, hashedPassword, profile);
     if (!updated) {
       return res.status(500).json({ message: 'Erro ao atualizar o usuário' });
     }
