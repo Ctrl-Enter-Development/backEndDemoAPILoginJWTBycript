@@ -25,7 +25,22 @@ router.post('/login', (req, res) => {
 });
 router.get('/users',authMiddleware, AllUsers);
 router.get('/user/:id',authMiddleware,adminOnly,getUser);
-router.put('/user/:id',authMiddleware, adminOnly, updateUser);
+router.put('/user/:id', [
+  // O userName não deve ser vazio
+  check('userName').not().isEmpty().withMessage('O nome de usuário é obrigatório'),
+  // O email deve ser válido
+  check('email').isEmail().withMessage('Digite um e-mail válido'),
+  // A senha deve ter pelo menos 5 caracteres
+  check('password').isLength({ min: 5 }).withMessage('A senha deve ter pelo menos 5 caracteres'),
+  // O perfil deve ser 'admin' ou 'user'
+  check('profile').isIn(['admin', 'user']).withMessage('O perfil deve ser "admin" ou "user"')
+], (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+}, updateUser);
 router.delete('/user/:id', authMiddleware,adminOnly,deleteUser);
 
 router.get('/protected', authMiddleware, (req, res) => {
