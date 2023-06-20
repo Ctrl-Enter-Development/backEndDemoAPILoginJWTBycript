@@ -10,6 +10,7 @@ const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 const logger = require('../logger');
+const notFoundHandler = require('./middlewares/notFoundHandler');
 
 
 require('dotenv').config();
@@ -28,6 +29,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use(errorHandler);
+app.use(notFoundHandler);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
