@@ -4,19 +4,30 @@
 const { createUser, getUserByEmail,getUserByID, getAllUsers, updateUserById, deleteUserByID} = require('../models/user');
 const { hashPassword, comparePassword } = require('../utils/bcrypt');
 const { generateToken } = require('../utils/jwt');
+const { validationResult } = require('express-validator');
+const AppError = require('../utils/AppError');
+const logger = require('../../logger');
+// depois, suas funções do controlador...
+
 
 async function signup(req, res) {
   const { userName, email, password, profile } = req.body;
 
+// Verifica se há erros de validação
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
+    logger.info('Rota de signup foi chamada', { requestBody: req.body });
     const existingUser = await getUserByEmail(email);
     if (existingUser) {
-      return res.status(400).json({ message: 'Usuário já existe' });
+      throw new AppError('Usuário já existe', 400);
     }
 
     const hashedPassword = await hashPassword(password);
     const userId = await createUser(userName, email, hashedPassword, profile);
-
+    logger.info('Usuário criado com sucesso', { userId });
     res.status(201).json({ message: 'Usuário criado com sucesso', userId });
   } catch (error) {
     console.error('Erro ao criar usuário:', error);
@@ -30,12 +41,12 @@ async function login(req, res) {
   try {
     const user = await getUserByEmail(email);
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
+      throw new AppError('Usuário não encontrado', 404);
     }
 
     const passwordMatch = await comparePassword(password, user.password);
     if (!passwordMatch) {
-      return res.status(401).json({ message: 'Credenciais inválidas' });
+      throw new AppError('Credenciais inválidas', 401);
     }
 
     const token = generateToken({ id: user.id, profile: user.profile  });
@@ -52,7 +63,7 @@ async function AllUsers(req, res) {
   try {
     const users = await getAllUsers();
     if (!users) {
-      return res.status(404).json({ message: 'Nenhum usário encontrado' });
+      throw new AppError('Nenhum usuário encontrado', 404);
     }
     
     return res.status(200).json(users);
@@ -69,7 +80,7 @@ async function getUser(req, res) {
   try {
     const user = await getUserByID(id);
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
+      throw new AppError('Nenhum usuário encontrado', 404);
     }
 
     return res.status(200).json(user);
@@ -87,7 +98,7 @@ async function updateUser(req, res) {
   try {
     const user = await getUserByID(id);
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
+      throw new AppError('Nenhum usuário encontrado', 404);
     }
 
     if (email !== user.email) {
@@ -102,7 +113,7 @@ async function updateUser(req, res) {
     // Verifique se o email não está sendo usado por outro usuário além do usuário atual
     const otherUsersWithSameEmail = await getUserByEmail(email);
     if (otherUsersWithSameEmail && otherUsersWithSameEmail.id !== id) {
-      return res.status(400).json({ message: 'O email já está em uso' });
+      throw new AppError('O email já está em uso', 404);
     }
 
     const updated = await updateUserById(id, userName, email, hashedPassword, profile);
@@ -124,10 +135,10 @@ async function deleteUser(req, res) {
 
   try {
     const existingUser = await getUserByID(id);
-    if (!existingUser) {
-
-      return res.status(404).json({ message: 'Usuário não existe' });
+    if (!existingUser)  {
+      throw new AppError('Usuário não existe', 404);
     }
+    
 
     await deleteUserByID(id);
     return res.status(200).json({ message: 'Usuário deletado' });
@@ -146,4 +157,5 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
+  
 };
