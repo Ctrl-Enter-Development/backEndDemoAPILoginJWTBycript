@@ -12,7 +12,9 @@ const logger = require('../../logger');
 
 async function signup(req, res) {
   const { userName, email, password, profile } = req.body;
-
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ error: 'Permissão negada. Apenas administradores podem criar usuários.' });
+  }
 // Verifica se há erros de validação
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -104,7 +106,7 @@ async function updateUser(req, res) {
     if (email !== user.email) {
       const existingUserByEmail = await getUserByEmail(email);
       if (existingUserByEmail) {
-        return res.status(400).json({ message: 'O email já está em uso' });
+        throw new AppError('Usuário já existe', 400);
       }
     }
 
