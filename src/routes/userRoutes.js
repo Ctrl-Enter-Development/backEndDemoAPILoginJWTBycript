@@ -40,7 +40,7 @@ router.put('/user/:id', [
     return res.status(400).json({ errors: errors.array() });
   }
   next();
-}, updateUser);
+},authMiddleware,adminOnly, updateUser);
 router.delete('/user/:id', authMiddleware,adminOnly,deleteUser);
 
 router.get('/protected', authMiddleware, (req, res) => {
