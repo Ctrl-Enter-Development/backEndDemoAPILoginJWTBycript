@@ -12,9 +12,9 @@ const logger = require('../../logger');
 
 async function signup(req, res) {
   const { userName, email, password, profile } = req.body;
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ error: 'Permissão negada. Apenas administradores podem criar usuários.' });
-  }
+  //  if (!req.user.isAdmin) {
+  //    return res.status(403).json({ error: 'Permissão negada. Apenas administradores podem criar usuários.' });
+  //  }
 // Verifica se há erros de validação
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
