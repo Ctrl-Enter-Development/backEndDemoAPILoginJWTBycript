@@ -24,7 +24,9 @@ router.post('/login', (req, res) => {
   login(req, res);
 });
 router.get('/users',authMiddleware, AllUsers);
+
 router.get('/user/:id',authMiddleware,adminOnly,getUser);
+
 router.put('/user/:id', [
   // O userName não deve ser vazio
   check('userName').not().isEmpty().withMessage('O nome de usuário é obrigatório'),
@@ -41,6 +43,7 @@ router.put('/user/:id', [
   }
   next();
 },authMiddleware,adminOnly, updateUser);
+
 router.delete('/user/:id', authMiddleware,adminOnly,deleteUser);
 
 router.get('/protected', authMiddleware, (req, res) => {
