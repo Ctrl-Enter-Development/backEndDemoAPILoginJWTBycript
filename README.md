@@ -1,22 +1,26 @@
-# apiSecretariaDesenvolvimentoRural
-
-# NOME_DA_SUA_API
-
-Descrição breve da sua API
+# apiSecretariaDesenvolvimentoRural#
 
 ## Requisitos
 
-- Node.js
-- MySQL
+- Node.js Version: v20.2.0
+- NPM Versio: 9.6.6
+- MySQL Version:  8.0.33
 
-A API estará acessível em http://localhost:3000.
+A API estará acessível em http://localhost:3333.
 
 ## Endpoints
-POST /api/signup: Cria um novo usuário. Requer um corpo JSON com os campos userName, email e password.
-POST /api/login: Faz login do usuário. Requer um corpo JSON com os campos email e password.
-GET /api/protected: Rota protegida. Requer um token JWT válido no cabeçalho Authorization para acessar.
+https://documenter.getpostman.com/view/21065617/2s93zFYerE
 
 ## Configure as variáveis de ambiente:
 
 Renomeie o arquivo .env.example para .env.
 Edite o arquivo .env e insira as configurações do seu banco de dados e a chave secreta para o JWT.
+
+## Instalação de bibliotecas (NÃO PRECIA CASO USE DOCKER COMPOSE)
+
+Run: `npm install`
+
+## Subir API (NÃO PRECIA CASO USE DOCKER COMPOSE)
+
+Run: `npm start`
+
